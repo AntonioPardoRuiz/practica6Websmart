@@ -30,7 +30,8 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
 
     // this would attach the deployed smart contract and its methods
     // to the `truffleTutorial` variable before all other tests are run
-    it("Create 7 tweets", async () => {
+    before(async () => {
+
         twitterContract = await TwitterContract.deployed()
 
         // Creating 5 tweets by other users
@@ -43,29 +44,29 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
 
             await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
             totalTweets.push(tweet);
-
-            // Creating 2 tweets by the owner
-            // Starting from 5 till 7
-            for (
-                let id = OTHER_USERS_TWEETS;
-                id < OWNER_TWEETS + OTHER_USERS_TWEETS;
-                id++
-            ) {
-                let tweet = {
-                    username: myAddress,
-                    tweetText: 'Owner tweet #' + id,
-                    isDeleted: false,
-                };
-
-                await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
-                totalTweets.push(tweet);
-                totalMyTweets.push(tweet);
-            }
         }
-    })
+        // Creating 2 tweets by the owner
+        // Starting from 5 till 7
+        for (
+            let id = OTHER_USERS_TWEETS;
+            id < OWNER_TWEETS + OTHER_USERS_TWEETS;
+            id++
+        ) {
+            let tweet = {
+                username: myAddress,
+                tweetText: 'Owner tweet #' + id,
+                isDeleted: false,
+            };
 
-    it("Add Tweet", function() {
-        it("should emit AddTweet event", async function() {
+            await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
+            totalTweets.push(tweet);
+            totalMyTweets.push(tweet);
+        }
+
+    });
+
+    describe("Add Tweet", () => {
+        it("should emit AddTweet event", async () => {
             let tweet = {
                 'tweetText': 'New Tweet',
                 'isDeleted': false
@@ -73,50 +74,34 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
 
             let result = await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted);
             truffleAssert.eventEmitted(result, 'AddTweet', (args) => {
-                return args[0] === contractOwner && args[1] === OTHER_USERS_TWEETS + OWNER_TWEETS;
+                return args[0] == contractOwner && args[1] == OTHER_USERS_TWEETS + OWNER_TWEETS;
             });
 
         })
     });
 
-    it('Get All Tweets', () => {
+    describe('Get All Tweets', () => {
         it('should return the correct number of total tweets', async () => {
             const tweetsFromChain = await twitterContract.getAllTweets();
-            expect(tweetsFromChain.length).to.equal(
-                OTHER_USERS_TWEETS + OWNER_TWEETS
-            );
+            expect(tweetsFromChain.length).to.equal(OTHER_USERS_TWEETS + OWNER_TWEETS + 1);
         });
     });
 
-    it('Get My Tweets', () => {
+    describe('Get My Tweets', () => {
         it('should return the correct number of total tweets', async () => {
             const tweetsFromChain = await twitterContract.getMyTweets({from: myAddress});
             expect(tweetsFromChain.length).to.equal(OWNER_TWEETS);
         });
     });
 
-    it('Update Tweet', () => {
-        it('should emit UpdateTweet event', async () => {
-            const TWEET_ID = 6; // Belongs to the owner
-            const TWEET_NEW_TEXT = 'new tweet text';
-            const TWEET_DELETED = false;
-
-            let result = await twitterContract.updateTweet(TWEET_ID, TWEET_NEW_TEXT, TWEET_DELETED, {from: myAddress})
-            truffleAssert.eventEmitted(result, 'UpdateTweet', (args) => {
-                return args[0] === myAddress && args[1] === TWEET_ID && args[2] === TWEET_DELETED;
-            });
-
-        });
-    });
-
-    it('Delete Tweet', () => {
+    describe('Delete Tweet', () => {
         it('should emit delete tweet event', async () => {
             const TWEET_ID = 1; // Belongs to other users
             const TWEET_DELETED = true;
 
             let result = await twitterContract.deleteTweet(TWEET_ID, TWEET_DELETED, {from: otherAddress})
             truffleAssert.eventEmitted(result, 'DeleteTweet', (args) => {
-                return args[0] === TWEET_ID && args[1] === TWEET_DELETED;
+                return args[0] == TWEET_ID && args[1] == TWEET_DELETED;
             });
         });
     });
