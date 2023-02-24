@@ -13,7 +13,7 @@ contract TwitterContract {
 
     struct Tweet {
         uint id;
-        address username;
+        address author;
         string tweetText;
         bool isDeleted;
     }
