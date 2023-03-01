@@ -14,7 +14,7 @@ contract TwitterContract {
 
     struct Tweet {
         uint id;
-        address username;
+        address author;
         string tweetText;
         string tweetImage;
         uint likes;
