@@ -42,7 +42,7 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
                 isDeleted: false,
             };
 
-            await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
+            await twitterContract.createTweet(tweet.tweetText, "", {from: tweet.username});
             totalTweets.push(tweet);
         }
         // Creating 2 tweets by the owner
@@ -58,22 +58,22 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
                 isDeleted: false,
             };
 
-            await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
+            await twitterContract.createTweet(tweet.tweetText, "", {from: tweet.username});
             totalTweets.push(tweet);
             totalMyTweets.push(tweet);
         }
 
     });
 
-    describe("Add Tweet", () => {
-        it("should emit AddTweet event", async () => {
+    describe("Create Tweet", () => {
+        it("should emit CreateTweet event", async () => {
             let tweet = {
                 'tweetText': 'New Tweet',
                 'isDeleted': false
             };
 
-            let result = await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted);
-            truffleAssert.eventEmitted(result, 'AddTweet', (args) => {
+            let result = await twitterContract.createTweet(tweet.tweetText, "");
+            truffleAssert.eventEmitted(result, 'CreateTweet', (args) => {
                 return args[0] == contractOwner && args[1] == OTHER_USERS_TWEETS + OWNER_TWEETS;
             });
 

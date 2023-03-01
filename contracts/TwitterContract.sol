@@ -8,13 +8,16 @@ pragma solidity >=0.4.22 <0.9.0;
  */
 contract TwitterContract {
 
-    event AddTweet(address recipient, uint tweetId);
+    event CreateTweet(address recipient, uint tweetId);
     event DeleteTweet(uint tweetId, bool isDeleted);
+    event LikeTweet(uint tweetId, uint likesCount);
 
     struct Tweet {
         uint id;
         address username;
         string tweetText;
+        string tweetImage;
+        uint likes;
         bool isDeleted;
     }
 
@@ -24,11 +27,11 @@ contract TwitterContract {
     mapping(uint256 => address) tweetToOwner;
 
     // Method to be called by our frontend when trying to add a new Tweet
-    function addTweet(string memory tweetText, bool isDeleted) external {
+    function createTweet(string memory tweetText, string memory tweetImage) external {
         uint tweetId = tweets.length;
-        tweets.push(Tweet(tweetId, msg.sender, tweetText, isDeleted));
+        tweets.push(Tweet(tweetId, msg.sender, tweetText, tweetImage, 0, false));
         tweetToOwner[tweetId] = msg.sender;
-        emit AddTweet(msg.sender, tweetId);
+        emit CreateTweet(msg.sender, tweetId);
     }
 
     // Method to get all the Tweets
@@ -73,6 +76,12 @@ contract TwitterContract {
             tweets[tweetId].isDeleted = isDeleted;
             emit DeleteTweet(tweetId, isDeleted);
         }
+    }
+
+    // Method to add a Like to a Tweet
+    function addLikeToTweet(uint tweetId) external {
+        tweets[tweetId].likes = tweets[tweetId].likes + 1;
+        emit LikeTweet(tweetId, tweets[tweetId].likes);
     }
 
 }
