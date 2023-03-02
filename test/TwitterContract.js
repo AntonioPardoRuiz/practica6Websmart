@@ -38,11 +38,12 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
         for (let id = 0; id < OTHER_USERS_TWEETS; id++) {
             let tweet = {
                 tweetText: 'Other user tweet #' + id,
+                tweetImage: '',
                 username: otherAddress,
                 isDeleted: false,
             };
 
-            await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
+            await twitterContract.addTweet(tweet.tweetText, tweet.tweetImage, {from: tweet.username});
             totalTweets.push(tweet);
         }
         // Creating 2 tweets by the owner
@@ -54,11 +55,12 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
         ) {
             let tweet = {
                 username: myAddress,
+                tweetImage: '',
                 tweetText: 'Owner tweet #' + id,
                 isDeleted: false,
             };
 
-            await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted, {from: tweet.username});
+            await twitterContract.addTweet(tweet.tweetText, tweet.tweetImage, {from: tweet.username});
             totalTweets.push(tweet);
             totalMyTweets.push(tweet);
         }
@@ -72,7 +74,7 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
                 'isDeleted': false
             };
 
-            let result = await twitterContract.addTweet(tweet.tweetText, tweet.isDeleted);
+            let result = await twitterContract.addTweet(tweet.tweetText, '');
             truffleAssert.eventEmitted(result, 'AddTweet', (args) => {
                 return args[0] == contractOwner && args[1] == OTHER_USERS_TWEETS + OWNER_TWEETS;
             });

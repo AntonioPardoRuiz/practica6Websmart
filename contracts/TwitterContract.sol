@@ -15,6 +15,7 @@ contract TwitterContract {
         uint id;
         address author;
         string tweetText;
+        string tweetImage;
         bool isDeleted;
     }
 
@@ -24,9 +25,9 @@ contract TwitterContract {
     mapping(uint256 => address) tweetToOwner;
 
     // Method to be called by our frontend when trying to add a new Tweet
-    function addTweet(string memory tweetText, bool isDeleted) external {
+    function addTweet(string memory tweetText, string memory tweetImage) external {
         uint tweetId = tweets.length;
-        tweets.push(Tweet(tweetId, msg.sender, tweetText, isDeleted));
+        tweets.push(Tweet(tweetId, msg.sender, tweetText, tweetImage, false));
         tweetToOwner[tweetId] = msg.sender;
         emit AddTweet(msg.sender, tweetId);
     }
