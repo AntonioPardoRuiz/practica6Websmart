@@ -40,7 +40,6 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
                 tweetText: 'Other user tweet #' + id,
                 tweetImage: '',
                 username: otherAddress,
-                isDeleted: false,
             };
 
             await twitterContract.addTweet(tweet.tweetText, tweet.tweetImage, {from: tweet.username});
@@ -57,7 +56,6 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
                 username: myAddress,
                 tweetImage: '',
                 tweetText: 'Owner tweet #' + id,
-                isDeleted: false,
             };
 
             await twitterContract.addTweet(tweet.tweetText, tweet.tweetImage, {from: tweet.username});
@@ -71,15 +69,57 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
         it("should emit AddTweet event", async () => {
             let tweet = {
                 'tweetText': 'New Tweet',
-                'isDeleted': false
             };
 
             let result = await twitterContract.addTweet(tweet.tweetText, '');
             truffleAssert.eventEmitted(result, 'AddTweet', (args) => {
                 return args[0] == contractOwner && args[1] == OTHER_USERS_TWEETS + OWNER_TWEETS;
             });
-
         })
+    });
+
+    describe("User", () => {
+        it("should emit UserEdited event", async () => {
+            let user = {
+                'name': 'Antonio Párraga',
+                'bio': 'Programming Motherfucker 20x',
+                'avatar': 'xxx'
+            };
+
+            let result = await twitterContract.updateUser(user.name, user.bio, user.avatar);
+            truffleAssert.eventEmitted(result, 'UserUpdated', (args) => {
+                return args[0] == contractOwner;
+            });
+        });
+
+        it('should return a given user', async () => {
+            const user = await twitterContract.getUser(contractOwner);
+            expect(user.name).to.equal('Antonio Párraga');
+            expect(user.bio).to.equal('Programming Motherfucker 20x');
+            expect(user.avatar).to.equal('xxx');
+
+        });
+
+        it('should update user', async () => {
+            let user = {
+                'name': 'Antuan Párraga',
+                'bio': 'Programming Motherfucker 22x',
+                'avatar': 'yyy'
+            };
+
+            let result = await twitterContract.updateUser(user.name, user.bio, user.avatar);
+            truffleAssert.eventEmitted(result, 'UserUpdated', (args) => {
+                return args[0] == contractOwner;
+            });
+        });
+
+        it('should return the user already modified', async () => {
+            const user = await twitterContract.getUser(contractOwner);
+            expect(user.name).to.equal('Antuan Párraga');
+            expect(user.bio).to.equal('Programming Motherfucker 22x');
+            expect(user.avatar).to.equal('yyy');
+        });
+
     });
 
     describe('Get All Tweets', () => {
@@ -105,6 +145,23 @@ contract('TwitterContract', ([contractOwner, myAddress, otherAddress]) => {
             truffleAssert.eventEmitted(result, 'DeleteTweet', (args) => {
                 return args[0] == TWEET_ID && args[1] == TWEET_DELETED;
             });
+        });
+    });
+
+    describe('Add more than 50 tweets', () => {
+        it('should keep last 50 tweets', async () => {
+            let tweet = {
+                'tweetText': 'New Tweet',
+            };
+
+            for(i = 0; i < 60; i++)
+            {
+                await twitterContract.addTweet(tweet.tweetText, '');
+            }
+
+            const tweetsFromChain = await twitterContract.getAllTweets();
+            expect(tweetsFromChain.length).to.equal(50);
+
         });
     });
 
